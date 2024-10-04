@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct Vehicle
+{
+	char vehicleNumber[20];
+	char type[20];
+	float speed;
+	struct Vehicle* next;
+}Vehicle;
+Vehicle* createVehicle(char* vehicleNumber, char* type, float speed) 
+{
+	Vehicle* newVehicle = (Vehicle*)malloc(sizeof(Vehicle));
+	strcpy(newVehicle->vehicleNumber, vehicleNumber);
+	strcpy(newVehicle->type, type);
+	newVehicle->speed = speed;
+	newVehicle->next = NULL;
+	return newVehicle;
+}
+void addVehicle(Vehicle** head, char* vehicleNumber, char* type, float speed) 
+{
+	Vehicle* newVehicle = createVehicle(vehicleNumber, type, speed);
+	if(*head == NULL) 
+	{
+		*head = newVehicle; 
+	} 
+	else 
+	{
+		Vehicle* temp = *head;
+		while(temp->next != NULL) 
+		{
+			temp = temp->next; 
+		}
+		temp->next = newVehicle; 
+	}
+}
+void displayVehicles(Vehicle* head) 
+{
+	if(head == NULL) 
+	{
+		printf("No vehicles on the road.\n");
+	} 
+	else 
+	{
+		Vehicle* temp = head;
+		printf("Vehicles on the road:\n");
+		while(temp != NULL) 
+		{
+			printf("Vehicle Number: %s, Type: %s, Speed: %.2f km/h\n", temp->vehicleNumber,
+			temp->type, temp->speed);
+			temp = temp->next;
+		}
+	}
+}
+void removeVehicle(Vehicle** head, char* vehicleNumber) 
+{
+	Vehicle* temp = *head;
+	Vehicle* prev = NULL;
+	if(temp != NULL && strcmp(temp->vehicleNumber, vehicleNumber) == 0) 
+	{
+		*head = temp->next; 
+		free(temp);
+		printf("Vehicle %s has left the road.\n", vehicleNumber);
+		return;
+	}
+	while(temp != NULL && strcmp(temp->vehicleNumber, vehicleNumber) != 0) 
+	{
+		prev = temp;
+		temp = temp->next;
+	}
+	if(temp == NULL) 
+	{
+		printf("Vehicle %s not found on the road.\n", vehicleNumber);
+		return;
+	}
+	prev->next = temp->next;
+	free(temp);
+	printf("Vehicle %s has left the road.\n", vehicleNumber);
+}
+int main() 
+{
+	Vehicle* head = NULL; 
+	addVehicle(&head, "MH12AB1234", "Car", 60.5);
+	addVehicle(&head, "MH14XY5678", "Truck", 45.3);
+	addVehicle(&head, "MH10CD9101", "Bike", 80.0);
+	displayVehicles(head);
+	removeVehicle(&head, "MH14XY5678");
+	displayVehicles(head);
+	return 0;
+}
