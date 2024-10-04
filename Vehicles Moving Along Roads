@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Structure for each vehicle
+typedef struct Vehicle {
+    char vehicleNumber[20]; // Vehicle registration number
+    char type[20];          // Vehicle type (e.g., car, truck, etc.)
+    float speed;            // Speed of the vehicle
+    struct Vehicle* next;   // Pointer to the next vehicle in the list
+} Vehicle;
+
+// Function to create a new vehicle
+Vehicle* createVehicle(char* vehicleNumber, char* type, float speed) {
+    Vehicle* newVehicle = (Vehicle*)malloc(sizeof(Vehicle));
+    strcpy(newVehicle->vehicleNumber, vehicleNumber);
+    strcpy(newVehicle->type, type);
+    newVehicle->speed = speed;
+    newVehicle->next = NULL;
+    return newVehicle;
+}
+
+// Function to add a vehicle to the road (linked list)
+void addVehicle(Vehicle** head, char* vehicleNumber, char* type, float speed) {
+    Vehicle* newVehicle = createVehicle(vehicleNumber, type, speed);
+    if (*head == NULL) {
+        *head = newVehicle; // If the list is empty, the new vehicle becomes the head
+    } else {
+        Vehicle* temp = *head;
+        while (temp->next != NULL) {
+            temp = temp->next; // Traverse to the end of the list
+        }
+        temp->next = newVehicle; // Add the new vehicle at the end
+    }
+}
+
+// Function to display all vehicles on the road
+void displayVehicles(Vehicle* head) {
+    if (head == NULL) {
+        printf("No vehicles on the road.\n");
+    } else {
+        Vehicle* temp = head;
+        printf("Vehicles on the road:\n");
+        while (temp != NULL) {
+            printf("Vehicle Number: %s, Type: %s, Speed: %.2f km/h\n", temp->vehicleNumber, temp->type, temp->speed);
+            temp = temp->next;
+        }
+    }
+}
+
+// Function to remove a vehicle from the road
+void removeVehicle(Vehicle** head, char* vehicleNumber) {
+    Vehicle* temp = *head;
+    Vehicle* prev = NULL;
+    
+    // If the head node itself holds the vehicle to be deleted
+    if (temp != NULL && strcmp(temp->vehicleNumber, vehicleNumber) == 0) {
+        *head = temp->next; // Change head
+        free(temp);         // Free old head
+        printf("Vehicle %s has left the road.\n", vehicleNumber);
+        return;
+    }
+    
+    // Search for the vehicle to be deleted
+    while (temp != NULL && strcmp(temp->vehicleNumber, vehicleNumber) != 0) {
+        prev = temp;
+        temp = temp->next;
+    }
+    
+    // If vehicle not present in the list
+    if (temp == NULL) {
+        printf("Vehicle %s not found on the road.\n", vehicleNumber);
+        return;
+    }
+    
+    // Unlink the node from the list and free it
+    prev->next = temp->next;
+    free(temp);
+    printf("Vehicle %s has left the road.\n", vehicleNumber);
+}
+
+// Main function
+int main() {
+    Vehicle* head = NULL; // Initialize an empty linked list
+    
+    // Adding vehicles
+    addVehicle(&head, "MH12AB1234", "Car", 60.5);
+    addVehicle(&head, "MH14XY5678", "Truck", 45.3);
+    addVehicle(&head, "MH10CD9101", "Bike", 80.0);
+    
+    // Display the vehicles on the road
+    displayVehicles(head);
+    
+    // Removing a vehicle from the road
+    removeVehicle(&head, "MH14XY5678");
+    
+    // Display the vehicles after removal
+    displayVehicles(head);
+    
+    return 0;
+}
