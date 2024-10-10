@@ -1,0 +1,145 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct {
+    char vehicleType[30];
+    int priority;
+} Vehicle;
+
+typedef struct {
+    Vehicle queue[MAX];
+    int front;
+    int rear;
+} EmergencyQueue;
+
+void initializeQueue(EmergencyQueue *q);
+int isFull(EmergencyQueue *q);
+int isEmpty(EmergencyQueue *q);
+void enqueue(EmergencyQueue *q, Vehicle v);
+Vehicle dequeue(EmergencyQueue *q);
+void displayQueue(EmergencyQueue *q);
+
+int main() {
+    EmergencyQueue q;
+    initializeQueue(&q);
+    int choice;
+    
+    do {
+        printf("\nEmergency Vehicles Management System\n");
+        printf("1. Add Vehicle to Queue\n");
+        printf("2. Dispatch Vehicle\n");
+        printf("3. Display Queue\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: {
+                Vehicle v;
+                printf("Enter Vehicle Type: ");
+                scanf("%s", v.vehicleType);
+                printf("Enter Priority Level (1-High, 2-Medium, 3-Low): ");
+                scanf("%d", &v.priority);
+                
+                if (v.priority < 1 || v.priority > 3) {
+                    printf("Invalid priority level. Please enter 1, 2, or 3.\n");
+                } else {
+                    enqueue(&q, v);
+                    printf("Vehicle added to queue.\n");
+                }
+                break;
+            }
+            case 2: {
+                Vehicle dispatchedVehicle = dequeue(&q);
+                if (strcmp(dispatchedVehicle.vehicleType, "") == 0) {
+                    printf("No vehicles in the queue to dispatch.\n");
+                } else {
+                    printf("Dispatched Vehicle: %s with priority %d\n", dispatchedVehicle.vehicleType, dispatchedVehicle.priority);
+                }
+                break;
+            }
+            case 3:
+                displayQueue(&q);
+                break;
+            case 4:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
+
+void initializeQueue(EmergencyQueue *q) {
+    q->front = -1;
+    q->rear = -1;
+}
+
+int isFull(EmergencyQueue *q) {
+    return (q->rear + 1) % MAX == q->front;
+}
+
+int isEmpty(EmergencyQueue *q) {
+    return q->front == -1;
+}
+
+void enqueue(EmergencyQueue *q, Vehicle v) {
+    if (isFull(q)) {
+        printf("Queue is full! Cannot add more vehicles.\n");
+        return;
+    }
+    
+    if (isEmpty(q)) {
+        q->front = 0;
+    }
+    
+    q->rear = (q->rear + 1) % MAX;
+    q->queue[q->rear] = v;
+    
+    for (int i = q->front; i < q->rear; i++) {
+        for (int j = i + 1; j <= q->rear; j++) {
+            if (q->queue[j].priority < q->queue[i].priority) {
+                Vehicle temp = q->queue[i];
+                q->queue[i] = q->queue[j];
+                q->queue[j] = temp;
+            }
+        }
+    }
+}
+
+Vehicle dequeue(EmergencyQueue *q) {
+    Vehicle v;
+    strcpy(v.vehicleType, "");
+    
+    if (isEmpty(q)) {
+        return v;
+    }
+    
+    v = q->queue[q->front];
+    
+    if (q->front == q->rear) {
+        q->front = -1;
+        q->rear = -1;
+    } else {
+        q->front = (q->front + 1) % MAX;
+    }
+    
+    return v;
+}
+
+void displayQueue(EmergencyQueue *q) {
+    if (isEmpty(q)) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    
+    printf("Emergency Vehicles in Queue:\n");
+    for (int i = q->front; i <= q->rear; i++) {
+        printf("Vehicle Type: %s, Priority: %d\n", q->queue[i].vehicleType, q->queue[i].priority);
+    }
+}
